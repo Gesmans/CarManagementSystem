@@ -14,7 +14,7 @@ class CarManagementSystem:
         self.cars = []
     def new_car(self, car):
         self.cars.append(car)
-    def updateexistingcar(self, make, model, **kwargs):
+    def update_existing_car(self, make, model, **kwargs):
             for car in self.cars:
                 if car.make == make and car.model == model:
                     car.year = kwargs.get('year', car.year)
@@ -22,13 +22,13 @@ class CarManagementSystem:
                     car.price = kwargs.get('price', car.price)
                 return True
             return False
-    def deletecar(self):
+    def delete_car(self):
         pass
-    def displayallcars(self):
+    def display_all_cars(self):
         print([car.display_details() for car in self.cars])   
-    def savecarstofile(self):
+    def save_cars_to_file(self):
         pass
-    def loadcarsfromfile(self):
+    def load_cars_from_file(self):
         pass
 
 def main():
@@ -60,18 +60,23 @@ def main():
             year = int(input("Enter new year (or press enter to skip): ") or 0)
             mileage = int(input("Enter new mileage (or press enter to skip): ") or 0)
             price = float(input("Enter new price (or press enter to skip): ") or 0.0)
-            updated = cms.updateexistingcar(make, model, year=year, mileage=mileage, price=price)
+            updated = cms.update_existing_car(make, model, year=year, mileage=mileage, price=price)
             if updated:
                 print("Car details updated successfully.")
             else:
                 print("Car not found.")
+        if choice == "3":
+            pass
 
-        
         if choice == '4':
-            cars = cms.displayallcars()
+            cars = cms.display_all_cars()
             if cars:
                 for car in cars:
                     print(car)
+        if choice == "5":
+            pass
+        if choice == "6":
+            pass
         
         if choice == '7':
             break
