@@ -1,3 +1,5 @@
+import json
+
 class Car:
     def __init__(self,make,model,year,mileage, price) -> None:
         self.make = make
@@ -22,12 +24,18 @@ class CarManagementSystem:
                     car.price = kwargs.get('price', car.price)
                 return True
             return False
-    def delete_car(self):
-        pass
+    def delete_car(self, make, model):
+         for car in self.cars:
+            if car.make == make and car.model == model:
+                self.cars.remove(car)
+            return True
+         return False
+
     def display_all_cars(self):
         print([car.display_details() for car in self.cars])   
-    def save_cars_to_file(self):
-        pass
+    def save_cars_to_file(self, filename):
+        with open(filename, 'w') as file:
+            json.dump([car.__dict__ for car in self.cars], file)
     def load_cars_from_file(self):
         pass
 
@@ -66,7 +74,13 @@ def main():
             else:
                 print("Car not found.")
         if choice == "3":
-            pass
+            make = input("Enter car make to delete: ")
+            model = input("Enter car model to delete: ")
+            deleted = cms.delete_car(make,model)
+            if deleted:
+                print("Car details deleted successfully.")
+            else:
+                print("Car not found.")
 
         if choice == '4':
             cars = cms.display_all_cars()
@@ -74,7 +88,10 @@ def main():
                 for car in cars:
                     print(car)
         if choice == "5":
-            pass
+            filename = input("Enter filename to save to (e.g., cars.json): ")
+            cms.save_cars_to_file(filename)
+            print("Car details saved successfully.")
+
         if choice == "6":
             pass
         
