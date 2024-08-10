@@ -36,8 +36,11 @@ class CarManagementSystem:
     def save_cars_to_file(self, filename):
         with open(filename, 'w') as file:
             json.dump([car.__dict__ for car in self.cars], file)
-    def load_cars_from_file(self):
-        pass
+    def load_cars_from_file(self,filename):
+        with open(filename, 'r') as file:
+            car_list = json.load(file)
+            self.cars = [Car(**car) for car in car_list]
+
 
 def main():
     cms = CarManagementSystem()
@@ -93,8 +96,9 @@ def main():
             print("Car details saved successfully.")
 
         if choice == "6":
-            pass
-        
+            filename = input("Enter filename to load (e.g cars.json): ")
+            cms.load_cars_from_file(filename)
+            print("Car details loaded successfully.")        
         if choice == '7':
             break
 
