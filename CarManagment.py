@@ -39,6 +39,8 @@ class Car:
 class CarManagementSystem:
     def __init__(self) -> None:
         self.cars = []
+    
+    # Logic to Add new Cars within the DataBase
     def new_car(self, make, model, year, mileage, price):
         cursor.execute("""
                     INSERT INTO cars (make, model, year, mileage, price)
@@ -47,6 +49,7 @@ class CarManagementSystem:
         connection.commit()
         cursor.close
 
+    # Logic to Update Cars within the DataBase
     def update_existing_car(self, id, **kwargs):
         # Build the SET clause dynamically based on provided kwargs
         update_fields = []
@@ -84,28 +87,21 @@ class CarManagementSystem:
             return True
         return False
 
-    
+    # Logic to Delete existing Cars
     def delete_car(self, id):
         cursor.execute("""
-                    DELETE FROM cars WHERE id = %s
-                """, (id))
+                    DELETE FROM cars
+                    WHERE id = %s
+                """, (id,))
         connection.commit()
-
+        
+    # Logic to Display existing Cars
     def display_all_cars(self):
         cursor.execute("SELECT * FROM cars")
         car_items = cursor.fetchall()  # Corrected to call fetchall()
         for item in car_items:
             print(f"ID: {item[0]}, Make: {item[1]}, Model: {item[2]}, Year: {item[3]}, Miles: {item[4]}, Price: ${item[5]}")
     
-    def save_cars_to_file(self, filename):
-        with open(filename, 'w') as file:
-            json.dump([car.__dict__ for car in self.cars], file)
-            
-    def load_cars_from_file(self,filename): 
-        with open(filename, 'r') as file:
-            car_list = json.load(file)
-            self.cars = [Car(**car) for car in car_list]
-
 
 def main():
     cms = CarManagementSystem()
@@ -115,9 +111,7 @@ def main():
         print("2. Update car details")
         print("3. Delete a car")
         print("4. Display all cars")
-        print("5. Save to file")
-        print("6. Load from file")
-        print("7. Exit")
+        print("5. Exit")
         choice = input("Enter your choice: ")
 
         if choice == '1':
@@ -144,25 +138,14 @@ def main():
 
         if choice == "3":
             id = int(input("Enter car ID to delete: "))
-            deleted = cms.delete_car(id)
-            if deleted:
-                print("Car details deleted successfully.")
-            else:
-                print("Car not found.")
+            cms.delete_car(id)
+            print("Car details deleted successfully.")
+
 
         if choice == '4':
             cms.display_all_cars()
-            
-        if choice == "5":
-            filename = input("Enter filename to save to (e.g., cars.json): ")
-            cms.save_cars_to_file(filename)
-            print("Car details saved successfully.")
-
-        if choice == "6":
-            filename = input("Enter filename to load (e.g cars.json): ")
-            cms.load_cars_from_file(filename)
-            print("Car details loaded successfully.")        
-        if choice == '7':
+                
+        if choice == '5':
             break
 
 
