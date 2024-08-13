@@ -23,15 +23,10 @@ connection = psycopg2.connect(
 cursor = connection.cursor()
 
 
-# Pull Car Items from Existing Database Table
-query = "SELECT * FROM cars;"
-cursor.execute(query)
-car_items = cursor.fetchall()  # Corrected to call fetchall()
-
-
 
 class Car:
-    def __init__(self,make,model,year,mileage, price) -> None:
+    def __init__(self,id,make,model,year,mileage, price) -> None:
+        self.id = id
         self.make = make
         self.model = model
         self.year = year
@@ -60,15 +55,15 @@ class CarManagementSystem:
                     car.price = kwargs.get('price', car.price)
                 return True
             return False
-    def delete_car(self, make, model):
-         for car in self.cars:
-            if car.make == make and car.model == model:
-                self.cars.remove(car)
-            return True
-         return False
+    
+    def delete_car(self, id):
+        cursor.execute("""
+                    DELETE FROM cars WHERE id = %s
+                """, (id))
+        connection.commit()
 
-    def display_all_cars(self, car_items):
-        cursor.execute(query)
+    def display_all_cars(self):
+        cursor.execute("SELECT * FROM cars")
         car_items = cursor.fetchall()  # Corrected to call fetchall()
         for item in car_items:
             print(f"ID: {item[0]}, Make: {item[1]}, Model: {item[2]}, Year: {item[3]}, Miles: {item[4]}, Price: ${item[5]}")
@@ -76,6 +71,7 @@ class CarManagementSystem:
     def save_cars_to_file(self, filename):
         with open(filename, 'w') as file:
             json.dump([car.__dict__ for car in self.cars], file)
+            
     def load_cars_from_file(self,filename): 
         with open(filename, 'r') as file:
             car_list = json.load(file)
@@ -117,16 +113,15 @@ def main():
                 print("Car not found.")
 
         if choice == "3":
-            make = input("Enter car make to delete: ")
-            model = input("Enter car model to delete: ")
-            deleted = cms.delete_car(make,model)
+            id = int(input("Enter car ID to delete: "))
+            deleted = cms.delete_car(id)
             if deleted:
                 print("Car details deleted successfully.")
             else:
                 print("Car not found.")
 
         if choice == '4':
-            cms.display_all_cars(car_items)
+            cms.display_all_cars()
             
         if choice == "5":
             filename = input("Enter filename to save to (e.g., cars.json): ")
