@@ -1,4 +1,34 @@
 import json
+import psycopg2
+import sys
+from datetime import datetime
+
+# Database connection details
+dbname = 'CarManagment'
+user = 'postgres'
+password = 'flipper'
+host = 'localhost'
+port = '5432'
+
+# Database Connection Action
+connection = psycopg2.connect(
+    dbname=dbname,
+    user=user,
+    password=password,
+    host=host,
+    port=port
+)
+
+# Create a cursor object to interact with the database
+cursor = connection.cursor()
+
+
+# Pull Car Items from Existing Database Table
+query = "SELECT * FROM cars;"
+cursor.execute(query)
+car_items = cursor.fetchall()  # Corrected to call fetchall()
+
+
 
 class Car:
     def __init__(self,make,model,year,mileage, price) -> None:
@@ -14,8 +44,14 @@ class Car:
 class CarManagementSystem:
     def __init__(self) -> None:
         self.cars = []
-    def new_car(self, car):
-        self.cars.append(car)
+    def new_car(self, make, model, year, mileage, price):
+        cursor.execute("""
+                    INSERT INTO cars (make, model, year, mileage, price)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (make, model, year, mileage, price))
+        connection.commit()
+        cursor.close
+
     def update_existing_car(self, make, model, **kwargs):
             for car in self.cars:
                 if car.make == make and car.model == model:
@@ -31,12 +67,16 @@ class CarManagementSystem:
             return True
          return False
 
-    def display_all_cars(self):
-        print([car.display_details() for car in self.cars])   
+    def display_all_cars(self, car_items):
+        cursor.execute(query)
+        car_items = cursor.fetchall()  # Corrected to call fetchall()
+        for item in car_items:
+            print(f"ID: {item[0]}, Make: {item[1]}, Model: {item[2]}, Year: {item[3]}, Miles: {item[4]}, Price: ${item[5]}")
+    
     def save_cars_to_file(self, filename):
         with open(filename, 'w') as file:
             json.dump([car.__dict__ for car in self.cars], file)
-    def load_cars_from_file(self,filename):
+    def load_cars_from_file(self,filename): 
         with open(filename, 'r') as file:
             car_list = json.load(file)
             self.cars = [Car(**car) for car in car_list]
@@ -61,8 +101,7 @@ def main():
             year = int(input("Enter car year: "))
             mileage = int(input("Enter car mileage: "))
             price = float(input("Enter car price: "))
-            car = Car(make, model, year, mileage, price)
-            cms.new_car(car)
+            cms.new_car(make, model, year, mileage, price)
             print("Car added successfully.")
 
         if choice == "2":
@@ -76,6 +115,7 @@ def main():
                 print("Car details updated successfully.")
             else:
                 print("Car not found.")
+
         if choice == "3":
             make = input("Enter car make to delete: ")
             model = input("Enter car model to delete: ")
@@ -86,10 +126,8 @@ def main():
                 print("Car not found.")
 
         if choice == '4':
-            cars = cms.display_all_cars()
-            if cars:
-                for car in cars:
-                    print(car)
+            cms.display_all_cars(car_items)
+            
         if choice == "5":
             filename = input("Enter filename to save to (e.g., cars.json): ")
             cms.save_cars_to_file(filename)
